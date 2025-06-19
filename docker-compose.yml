@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    environment:
+      SA_PASSWORD: "Admin!database"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - myapp-network
+
+  web:
+    image: fastapi_app:latest 
+    container_name: fastapi_app_container
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    networks:
+      - myapp-network
+    environment:
+      DB_SERVER: db
+      DB_NAME: myapp_db
+      DB_USER: sa
+      DB_PASSWORD: Admin!database
+
+networks:
+  myapp-network:
