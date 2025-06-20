@@ -27,7 +27,10 @@ def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
 "Read whole tasks from db"
 @app.get("/tasks", response_model=list[schemas.Task])
 def read_tasks(db: Session = Depends(get_db)):
-    return db.query(models.Task).all()
+    return db.query(models.Task)\
+            .filter(models.Task.deleted == False)\
+            .all()
+
 
 "Modify task"
 @app.put("/tasks/{task_id}", response_model=schemas.Task)
@@ -39,6 +42,17 @@ def update_task(task_id: int, updated_task: schemas.TaskCreate, db: Session = De
     db_task.title = updated_task.title
     db_task.done = updated_task.done
 
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+@app.delete("/tasks/{task_id}", response_model=schemas.Task)
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    db_task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    db_task.deleted = True  # Mark as deleted instead of removing from DB
     db.commit()
     db.refresh(db_task)
     return db_task

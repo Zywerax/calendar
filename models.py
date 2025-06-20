@@ -9,3 +9,4 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     done = Column(Boolean, default=False)
+    deleted = Column(Boolean, default=False)
