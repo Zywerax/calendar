@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean
 from database import Base
 
-"Tworzenie modeli obiektów/ tabel bazy danych"
-
+"""database task model for SQLAlchemy ORM"""
 class Task(Base):
     __tablename__ = "tasks"
 
