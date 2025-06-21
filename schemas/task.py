@@ -14,13 +14,17 @@ class TaskCreate(TaskBase):
 class Task(TaskBase):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True,  # odpowiada orm_mode = True
+    }
 
 """clases used to update task"""
 class TaskUpdate(BaseModel):
     title: Optional[str] = None # Optional allows the field to be omitted
     done: Optional[bool] = None # Optional allows the field to be omitted
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True,  # odpowiada orm_mode = True
+    }
+
+Task.model_rebuild()
