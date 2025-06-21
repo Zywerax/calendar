@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from urllib.parse import quote_plus
 import os
 
+
+
 """Database configuration for SQLAlchemy ORM with Microsoft SQL Server"""
 DB_SERVER = os.getenv("DB_SERVER", "localhost")
 DB_NAME = os.getenv("DB_NAME", "myapp_db")
@@ -23,3 +25,11 @@ DATABASE_URL = f"mssql+pyodbc:///?odbc_connect={params}"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+# Dependency – tworzenie sesji DB
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
