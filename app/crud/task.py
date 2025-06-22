@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Response
 from app.database import get_db
 import app.models.task as task_model
 import app.schemas.task as task_schemas
@@ -18,6 +18,13 @@ def read_tasks(db: Session = Depends(get_db)):
     return db.query(task_model.Task)\
             .filter(task_model.Task.deleted == False)\
             .all()
+
+"""Read whole tasks from db"""
+def read_task_by_id(task_id: int, db: Session = Depends(get_db)):
+    return db.query(task_model.Task)\
+            .filter(task_model.Task.deleted == False)\
+            .filter(task_model.Task.id == task_id)\
+            .first()
 
 """Modify whole task by id"""
 def update_task(task_id: int, updated_task: task_schemas.TaskCreate, db: Session = Depends(get_db)):
@@ -41,7 +48,7 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     db_task.deleted = True  # Mark as deleted instead of removing from DB
     db.commit()
     db.refresh(db_task)
-    return db_task
+    return Response(status_code=204)
 
 """Modify part of task by id"""
 def patch_task(task_id: int, updated_task: task_schemas.TaskUpdate, db: Session = Depends(get_db)):

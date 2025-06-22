@@ -17,8 +17,8 @@ services:
     #---------hot reload mode----vvvvvvv------
     build: .
     volumes:
-      - C:/Users/mbuku/OneDrive/Dokumenty/docker_python_image/calendar/app/:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      - C:/Users/mbuku/OneDrive/Dokumenty/docker_python_image/calendar/:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     #---------hot reload mode---^^^^^^^-------
     container_name: fastapi_app_container
     depends_on:
