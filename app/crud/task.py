@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException
-from database import get_db
-import models.task as task_model
-import schemas.task as task_schemas
+from app.database import get_db
+import app.models.task as task_model
+import app.schemas.task as task_schemas
 
 
 "Add task with title and status"
