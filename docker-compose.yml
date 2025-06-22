@@ -13,7 +13,13 @@ services:
       - myapp-network
 
   web:
-    image: fastapi_app:latest 
+    # image: fastapi_app:latest  # Uncomment this line to use a pre-built image
+    #---------hot reload mode----vvvvvvv------
+    build: .
+    volumes:
+      - C:/Users/mbuku/OneDrive/Dokumenty/docker_python_image/calendar/app/:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    #---------hot reload mode---^^^^^^^-------
     container_name: fastapi_app_container
     depends_on:
       - db
