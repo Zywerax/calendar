@@ -5,6 +5,7 @@ from app.core.security import get_hash_password
 
 def create_user(db: Session, user: UserCreate):
     db_user = User(
+        username=user.username,
         email=user.email,
         hashed_password=get_hash_password(user.password),
     )
