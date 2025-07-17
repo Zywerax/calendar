@@ -7,7 +7,7 @@ import os
 
 """Database configuration for SQLAlchemy ORM with Microsoft SQL Server"""
 DB_SERVER = os.getenv("DB_SERVER", "localhost")
-DB_NAME = os.getenv("DB_NAME", "myapp_db")
+DB_NAME = os.getenv("DB_NAME", "myapp_database")
 DB_USER = os.getenv("DB_USER", "sa")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "Admin!database")
 
