@@ -12,7 +12,7 @@ router = APIRouter()
 def register_user(user: user_schemas.UserCreate, db: Session = Depends(get_db)):
     existing_user = user_crud.get_user_by_email(db, user.email)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=409, detail="Email already registered")
     
     new_user = user_crud.create_user(db=db, user=user)
     return new_user
