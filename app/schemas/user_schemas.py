@@ -20,6 +20,10 @@ class UserOut(BaseModel):
     username: str
     email: EmailStr
 
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
     model_config = {
         "from_attributes": True,  # odpowiada orm_mode = True
     }
