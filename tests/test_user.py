@@ -12,11 +12,13 @@ def generate_fake_user():
         "password": fake.password(),
         "email": fake.unique.email()
     }
+    
+global_payload = generate_fake_user()
 
 def test_register_user():
     """Register a new user and verify the response"""
     
-    payload = generate_fake_user()
+    payload = global_payload
 
     response = client.post("/register", json=payload)
     assert response.status_code == 201
@@ -27,10 +29,8 @@ def test_register_user():
 
 def test_login_user():
     """Login with the registered user and verify the response"""
-    payload = {
-        "email": "test1333user@example.com",
-        "password": "testpass1"
-    }
+    
+    payload = global_payload
 
     response = client.post("/login", json=payload)
     assert response.status_code == 200
