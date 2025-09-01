@@ -5,9 +5,16 @@ import os
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+def get_env_var(name: str, default: str | None = None) -> str:
+    value = os.getenv(name, default)
+    if value is None:
+        raise ValueError(f"Missing required environment variable: {name}")
+    return value
+
+SECRET_KEY = get_env_var("SECRET_KEY")
+ALGORITHM = get_env_var("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(get_env_var("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
 
 def create_access_token(data: dict):
     to_encode = data.copy()
