@@ -1,5 +1,8 @@
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
 from alembic import context
 from dotenv import load_dotenv
 import os
@@ -24,6 +27,8 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.database import Base
+import app.models.user_model
+import app.models.task
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -32,7 +37,6 @@ target_metadata = Base.metadata
 # ... etc.
 
 
-# OFFLINE
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
     config.set_main_option("sqlalchemy.url", database_url)
@@ -47,7 +51,6 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-# ONLINE
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     config.set_main_option("sqlalchemy.url", database_url)
@@ -58,7 +61,15 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
 
         with context.begin_transaction():
             context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
