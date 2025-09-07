@@ -28,5 +28,5 @@ def login_user(user_credentials: user_schemas.UserLogin, db: Session = Depends(g
     if not user or not security.verify_password(user_credentials.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    access_token = jwt_utils.create_access_token({"sub": user.email})
+    access_token = jwt_utils.create_access_token({"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}

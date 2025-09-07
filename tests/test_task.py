@@ -1,7 +1,18 @@
 from fastapi.testclient import TestClient
 from app.main import app
+from faker import Faker
 
+fake = Faker()
 client = TestClient(app)
+
+def generate_fake_user():
+    return {
+        "username": fake.user_name(),
+        "password": fake.password(),
+        "email": fake.unique.email()
+    }
+
+
 
 def test_get_tasks():
     """Fetch all tasks and verify the response"""
@@ -12,9 +23,28 @@ def test_get_tasks():
 
 def test_create_task():
     """Create a new task and verify its creation"""
+    global_payload = generate_fake_user()
 
+    register_payload = {
+        "username": global_payload.get("username"),
+        "password": global_payload.get("password"),
+        "email": global_payload.get("email")
+    }
+    response = client.post("/register", json=register_payload)
+    assert response.status_code == 201
+    login_payload = {
+        "email": global_payload.get("email"),
+        "password": global_payload.get("password")
+    }
+
+    response = client.post("/login", json=login_payload)
+    print("Login response:", response.json())
+    assert response.status_code == 200
+    access_token = response.json().get("access_token")
+    assert access_token is not None, "No access token in response"
     payload = {"title": "New Task", "done": False}
-    response = client.post("/tasks", json=payload)
+    response = client.post("/tasks", json=payload, params={"token": access_token})
+    print(response.json())
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == payload["title"]

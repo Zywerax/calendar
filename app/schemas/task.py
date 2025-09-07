@@ -13,6 +13,7 @@ class TaskCreate(TaskBase):
 """clases used to create task"""
 class Task(TaskBase):
     id: int
+    user_id: int
 
     model_config = {
         "from_attributes": True,  # odpowiada orm_mode = True

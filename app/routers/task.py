@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.auth.deps import get_current_user
 from app.database import get_db
 import app.models.task as task_model
+from app.models.user_model import User
 import app.schemas.task as task_schemas
 import app.crud.task as task_crud
 
@@ -9,8 +11,10 @@ router = APIRouter()
 
 """Add task with title and status"""
 @router.post("/tasks", response_model=task_schemas.Task)
-def create_task(task: task_schemas.TaskCreate, db: Session = Depends(get_db)):
-    return task_crud.create_task(task=task, db=db)
+def create_task(task: task_schemas.TaskCreate, 
+                db: Session = Depends(get_db), 
+                current_user: User = Depends(get_current_user)):
+    return task_crud.create_task(task=task, db=db, current_user=current_user)
 
 """Read whole tasks from db"""
 @router.get("/tasks", response_model=list[task_schemas.Task])

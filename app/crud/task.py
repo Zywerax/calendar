@@ -1,13 +1,19 @@
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, Response
+from app.auth.deps import get_current_user
 from app.database import get_db
 import app.models.task as task_model
+from app.models.user_model import User
 import app.schemas.task as task_schemas
 
 
 "Add task with title and status"
-def create_task(task: task_schemas.TaskCreate, db: Session = Depends(get_db)):
-    db_task = task_model.Task(title=task.title, done=task.done)
+def create_task(task: task_schemas.TaskCreate, 
+                db: Session = Depends(get_db), 
+                current_user: User = Depends(get_current_user)):
+    db_task = task_model.Task(title=task.title, 
+                              done=task.done, 
+                              user_id=current_user.id)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
