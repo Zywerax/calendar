@@ -12,7 +12,7 @@ def generate_fake_user():
         "email": fake.unique.email()
     }
 
-
+global_payload = generate_fake_user()
 
 def test_get_tasks():
     """Fetch all tasks and verify the response"""
@@ -23,7 +23,7 @@ def test_get_tasks():
 
 def test_create_task():
     """Create a new task and verify its creation"""
-    global_payload = generate_fake_user()
+
 
     register_payload = {
         "username": global_payload.get("username"),
@@ -54,8 +54,16 @@ def test_create_task():
 def test_update_task_put():
     """Create a task and then update it using PUT method"""
 
-    payload = {"title": "Task to update", "done": False}
-    response = client.post("/tasks/", json=payload)
+    login_payload = {
+        "email": global_payload.get("email"),
+        "password": global_payload.get("password")
+    }
+    response = client.post("/login", json=login_payload)
+    assert response.status_code == 200
+    access_token = response.json().get("access_token")
+
+    payload = {"title": "Task to delete", "done": False}
+    response = client.post("/tasks/", json=payload, params={"token": access_token})
     assert response.status_code == 200
     task_id = response.json()["id"]
 
@@ -69,9 +77,16 @@ def test_update_task_put():
 
 def test_update_task_patch():
     """Create a task and then partially update it using PATCH method"""
-    
-    payload = {"title": "Task to patch", "done": False}
-    response = client.post("/tasks/", json=payload)
+    login_payload = {
+        "email": global_payload.get("email"),
+        "password": global_payload.get("password")
+    }
+    response = client.post("/login", json=login_payload)
+    assert response.status_code == 200
+    access_token = response.json().get("access_token")
+
+    payload = {"title": "Task to delete", "done": False}
+    response = client.post("/tasks/", json=payload, params={"token": access_token})
     assert response.status_code == 200
     task_id = response.json()["id"]
 
@@ -85,8 +100,17 @@ def test_update_task_patch():
 
 def test_delete_task():
     """Create a task and then delete it, verifying it no longer exists"""
+    login_payload = {
+        "email": global_payload.get("email"),
+        "password": global_payload.get("password")
+    }
+    response = client.post("/login", json=login_payload)
+    assert response.status_code == 200
+    access_token = response.json().get("access_token")
+    
     payload = {"title": "Task to delete", "done": False}
-    response = client.post("/tasks/", json=payload)
+    response = client.post("/tasks/", json=payload, params={"token": access_token})
+    print(response.json())
     assert response.status_code == 200
     task_id = response.json()["id"]
 
