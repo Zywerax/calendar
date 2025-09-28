@@ -43,7 +43,7 @@ def test_create_task():
     access_token = response.json().get("access_token")
     assert access_token is not None, "No access token in response"
     payload = {"title": "New Task", "done": False}
-    response = client.post("/tasks", json=payload, params={"token": access_token})
+    response = client.post("/tasks", json=payload, headers={"Authorization": f"Bearer {access_token}"})
     print(response.json())
     assert response.status_code == 200
     data = response.json()
@@ -63,7 +63,7 @@ def test_update_task_put():
     access_token = response.json().get("access_token")
 
     payload = {"title": "Task to delete", "done": False}
-    response = client.post("/tasks/", json=payload, params={"token": access_token})
+    response = client.post("/tasks/", json=payload, headers={"Authorization": f"Bearer {access_token}"})
     assert response.status_code == 200
     task_id = response.json()["id"]
 
@@ -86,7 +86,7 @@ def test_update_task_patch():
     access_token = response.json().get("access_token")
 
     payload = {"title": "Task to delete", "done": False}
-    response = client.post("/tasks/", json=payload, params={"token": access_token})
+    response = client.post("/tasks/", json=payload, headers={"Authorization": f"Bearer {access_token}"})
     assert response.status_code == 200
     task_id = response.json()["id"]
 
@@ -109,7 +109,7 @@ def test_delete_task():
     access_token = response.json().get("access_token")
     
     payload = {"title": "Task to delete", "done": False}
-    response = client.post("/tasks/", json=payload, params={"token": access_token})
+    response = client.post("/tasks/", json=payload, headers={"Authorization": f"Bearer {access_token}"})
     print(response.json())
     assert response.status_code == 200
     task_id = response.json()["id"]
@@ -119,3 +119,73 @@ def test_delete_task():
 
     response = client.get(f"/tasks/{task_id}")
     assert response.status_code == 404 # Task should not be found after deletion
+
+
+# --- New helper for unique users in additional tests ---
+def generate_unique_user():
+    return {
+        "username": fake.unique.user_name(),
+        "password": fake.password(),
+        "email": fake.unique.email(),
+    }
+
+
+def register_and_login_unique():
+    payload = generate_unique_user()
+    # Register
+    r = client.post("/register", json=payload)
+    assert r.status_code == 201
+    user_out = r.json()
+    user_id = user_out["id"]
+
+    # Login
+    r = client.post("/login", json={"email": payload["email"], "password": payload["password"]})
+    assert r.status_code == 200
+    token = r.json()["access_token"]
+    return token, user_id
+
+
+def test_create_task_requires_bearer_header():
+    # No Authorization header -> 401
+    payload = {"title": "No auth", "done": False}
+    r = client.post("/tasks", json=payload)
+    assert r.status_code == 401
+
+
+def test_create_task_sets_user_id_from_token():
+    token, user_id = register_and_login_unique()
+    payload = {"title": "Owned by current user", "done": False}
+    r = client.post("/tasks", json=payload, headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["user_id"] == user_id
+
+
+def test_invalid_token_returns_401_on_create():
+    payload = {"title": "Bad token", "done": False}
+    r = client.post("/tasks", json=payload, headers={"Authorization": "Bearer invalid-token"})
+    assert r.status_code == 401
+
+
+def test_read_task_by_id_returns_404_when_missing():
+    r = client.get("/tasks/999999999")
+    assert r.status_code == 404
+
+
+def test_read_tasks_excludes_deleted_tasks():
+    token, _ = register_and_login_unique()
+    # Create a task
+    payload = {"title": "To be deleted", "done": False}
+    r = client.post("/tasks", json=payload, headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200
+    task_id = r.json()["id"]
+
+    # Delete it
+    r = client.delete(f"/tasks/{task_id}")
+    assert r.status_code == 204
+
+    # Ensure not present in list
+    r = client.get("/tasks")
+    assert r.status_code == 200
+    ids = [t["id"] for t in r.json()]
+    assert task_id not in ids
